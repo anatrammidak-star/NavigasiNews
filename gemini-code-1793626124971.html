@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NavigasiNews.link - Agregator Berita & Tren Informasi</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            red: '#DC2626',
+                            black: '#111827',
+                            darkbg: '#0F172A',
+                            darkcard: '#1E293B'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        .news-card-hover { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .news-card-hover:hover { transform: translateY(-2px); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 dark:bg-slate-900 dark:text-gray-100 min-h-screen flex flex-col font-sans transition-colors duration-200">
+
+    <!-- HEADER / NAVIGATION BAR -->
+    <header class="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 sticky top-0 z-40 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                
+                <!-- Logo & Brand Name -->
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="filterCategory('All', 'Semua Berita')">
+                    <div class="bg-red-600 text-white p-2 rounded-lg shadow">
+                        <i class="ph-bold ph-newspaper text-2xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-extrabold tracking-tight">
+                            <span class="text-black dark:text-white">Navigasi</span><span class="text-red-600">News</span><span class="text-black dark:text-white">.link</span>
+                        </h1>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">Agregator Berita Terkini & Analisis Tren Real-time</p>
+                    </div>
+                </div>
+
+                <!-- Right Header Controls -->
+                <div class="flex items-center space-x-2 sm:space-x-4">
+                    <!-- Netizen Journalism Action Button -->
+                    <button onclick="openModal('citizenModal')" class="bg-red-600 hover:bg-red-700 text-white text-xs sm:text-sm font-semibold px-3 py-2 rounded-lg flex items-center gap-1.5 shadow transition">
+                        <i class="ph-bold ph-mega text-base"></i>
+                        <span class="hidden sm:inline">Lapor Berita / Citizen Journalism</span>
+                        <span class="sm:hidden">Lapor</span>
+                    </button>
+
+                    <!-- Self-Serve Ads Portal Link -->
+                    <button onclick="openModal('adPortalModal')" class="bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 text-gray-700 dark:text-gray-200 text-xs sm:text-sm font-medium px-3 py-2 rounded-lg flex items-center gap-1.5 transition">
+                        <i class="ph-bold ph-megaphone text-base text-yellow-500"></i>
+                        <span class="hidden md:inline">Sewa Iklan</span>
+                    </button>
+
+                    <!-- Dark Mode Toggle -->
+                    <button onclick="toggleDarkMode()" class="p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition" title="Toggle Tema">
+                        <i id="themeIcon" class="ph-bold ph-moon text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- LIVE TICKER & FEED STATUS -->
+    <div class="bg-slate-900 text-white py-2 text-xs border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-2">
+            <div class="flex items-center gap-2 w-full sm:w-auto overflow-hidden">
+                <span class="bg-red-600 font-bold px-2 py-0.5 rounded text-[10px] uppercase tracking-wider shrink-0">TRENDING NOW</span>
+                <marquee class="text-gray-300 text-xs">Puncak KTT Iklim Internasional Capai Kesepakatan Baru • Ekonomi Digital Nasional Tumbuh Positif 2026 • Kebijakan Transportasi Hijau Daerah Mulai Diterapkan</marquee>
+            </div>
+            <div class="flex items-center gap-3 text-gray-400 text-[11px] shrink-0">
+                <span class="flex items-center gap-1"><i class="ph-bold ph-circle text-emerald-500 text-[8px]"></i> Google News Feed: Live</span>
+                <button onclick="fetchLiveRSS()" class="hover:text-white flex items-center gap-1 transition">
+                    <i class="ph-bold ph-arrows-clockwise"></i> Refresh Feed
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN BODY CONTENT -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+            <!-- SISI KIRI (NAVIGASI WILAYAH & KATEGORI) - 3 COLS -->
+            <aside class="lg:col-span-3 space-y-6">
+                
+                <!-- Section 1: Filter Berdasarkan Wilayah -->
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-gray-200 dark:border-slate-700 shadow-sm">
+                    <h2 class="text-xs font-extrabold text-gray-400 dark:text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                        <i class="ph-bold ph-globe"></i> Judul Section: Wilayah
+                    </h2>
+                    <nav class="space-y-1">
+                        <button onclick="filterCategory('Internasional', 'Berita Internasional')" class="sidebar-btn text-left w-full px-3 py-2.5 rounded-lg font-medium text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center justify-between transition">
+                            <span class="flex items-center gap-2"><i class="ph-bold ph-planet text-blue-500"></i> Internasional</span>
+                            <span class="bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-300 text-xs px-2 py-0.5 rounded-full font-semibold">Live</span>
+                        </button>
+                        <button onclick="filterCategory('Nasional', 'Berita Nasional')" class="sidebar-btn text-left w-full px-3 py-2.5 rounded-lg font-medium text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center justify-between transition">
+                            <span class="flex items-center gap-2"><i class="ph-bold ph-flag text-red-500"></i> Nasional</span>
+                            <span class="bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-300 text-xs px-2 py-0.5 rounded-full font-semibold">Live</span>
+                        </button>
+                        <button onclick="filterCategory('Daerah', 'Berita Daerah / Lokal')" class="sidebar-btn text-left w-full px-3 py-2.5 rounded-lg font-medium text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center justify-between transition">
+                            <span class="flex items-center gap-2"><i class="ph-bold ph-map-pin text-emerald-500"></i> Daerah</span>
+                            <span class="bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-300 text-xs px-2 py-0.5 rounded-full font-semibold">Lokal</span>
+                        </button>
+                    </nav>
+                </div>
+
+                <!-- Section 2: Filter Berdasarkan Kategori Topik -->
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-gray-200 dark:border-slate-700 shadow-sm">
+                    <h2 class="text-xs font-extrabold text-gray-400 dark:text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                        <i class="ph-bold ph-squares-four"></i> Section 2: Topik Berita
+                    </h2>
+                    <nav class="space-y-1">
+                        <button onclick="filterCategory('Politik', 'Berita Politik')" class="sidebar-btn text-left w-full px-3 py-2 rounded-lg text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center gap-2 transition">
+                            <i class="ph-bold ph-scales text-purple-500"></i> Politik
+                        </button>
+                        <button onclick="filterCategory('Ekonomi-Keuangan', 'Ekonomi & Keuangan')" class="sidebar-btn text-left w-full px-3 py-2 rounded-lg text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center gap-2 transition">
+                            <i class="ph-bold ph-trend-up text-emerald-500"></i> Ekonomi-Keuangan
+                        </button>
+                        <button onclick="filterCategory('Lingkungan Hidup', 'Lingkungan Hidup & Konservasi')" class="sidebar-btn text-left w-full px-3 py-2 rounded-lg text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center gap-2 transition">
+                            <i class="ph-bold ph-tree text-green-500"></i> Lingkungan Hidup
+                        </button>
+                        <button onclick="filterCategory('Budaya', 'Budaya & Seni')" class="sidebar-btn text-left w-full px-3 py-2 rounded-lg text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center gap-2 transition">
+                            <i class="ph-bold ph-palette text-amber-500"></i> Budaya
+                        </button>
+                        <button onclick="filterCategory('Ilmu Pengetahuan Teknologi', 'Ilmu Pengetahuan & Teknologi')" class="sidebar-btn text-left w-full px-3 py-2 rounded-lg text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center gap-2 transition">
+                            <i class="ph-bold ph-cpu text-indigo-500"></i> Ilmu Pengetahuan Teknologi
+                        </button>
+                    </nav>
+                </div>
+
+                <!-- Programmatic Automated Ad Space (Sidebar Left) -->
+                <div class="bg-gray-200 dark:bg-slate-800 p-4 rounded-xl border border-dashed border-gray-300 dark:border-slate-700 text-center">
+                    <span class="text-[10px] font-bold text-gray-400 dark:text-gray-500 block mb-2 uppercase">Iklan Otomatis (AdSense / Prebid.js)</span>
+                    <div class="h-44 bg-gray-300 dark:bg-slate-700 rounded-lg flex flex-col justify-center items-center p-3">
+                        <i class="ph-bold ph-chart-line-up text-3xl text-gray-400 dark:text-gray-500 mb-1"></i>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 font-semibold">Ruang Banner Sponsor</p>
+                        <p class="text-[10px] text-gray-400">Targeting AI & Penagihan Programatik</p>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- BAGIAN TENGAH (BERITA UTAMA & FEED UTAMA) - 6 COLS -->
+            <main class="lg:col-span-6 space-y-6">
+                
+                <!-- Title Header Active Section -->
+                <div class="flex items-center justify-between border-b border-gray-200 dark:border-slate-700 pb-3">
+                    <div>
+                        <h2 id="activeFilterTitle" class="text-xl font-extrabold text-gray-900 dark:text-white">Berita Utama & Feed Google News</h2>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Rangkuman ringkas dan tautan langsung dari sumber berita terpercaya.</p>
+                    </div>
+                    <span id="newsCountBadge" class="bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-300 text-xs font-bold px-2.5 py-1 rounded-full">
+                        Loading...
+                    </span>
+                </div>
+
+                <!-- Section 3: Headline / Berita Paling Trend -->
+                <div id="headlineContainer" class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden shadow-sm news-card-hover">
+                    <!-- Dynamic Headline Injection -->
+                </div>
+
+                <!-- Section 4: Feed Berita Per Kategori/Wilayah -->
+                <div class="space-y-4">
+                    <h3 class="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Feed Terkini (Google News Sync)</h3>
+                    
+                    <div id="newsFeedList" class="space-y-4">
+                        <!-- Dynamic News Items Inject Here -->
+                    </div>
+                </div>
+            </main>
+
+            <!-- BAGIAN KANAN (TREND MEDSOS, HEALTH INDEX, MONETISASI) - 3 COLS -->
+            <aside class="lg:col-span-3 space-y-6">
+                
+                <!-- Section 5A: Tren Medsos -->
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-gray-200 dark:border-slate-700 shadow-sm">
+                    <h2 class="text-xs font-extrabold text-gray-400 dark:text-gray-400 uppercase tracking-wider mb-3 flex items-center justify-between">
+                        <span class="flex items-center gap-1.5"><i class="ph-bold ph-trend-up text-red-500"></i> Trend Medsos</span>
+                        <span class="text-[10px] text-gray-400">Live 24h</span>
+                    </h2>
+                    <ul class="space-y-3">
+                        <li class="flex items-start justify-between border-b border-gray-100 dark:border-slate-700 pb-2">
+                            <div>
+                                <span class="text-xs font-bold text-gray-900 dark:text-white hover:text-red-600 cursor-pointer">#KTT_Iklim2026</span>
+                                <p class="text-[10px] text-gray-400">142.5K Posting • X / Twitter</p>
+                            </div>
+                            <span class="text-xs font-bold text-emerald-500">▲ +34%</span>
+                        </li>
+                        <li class="flex items-start justify-between border-b border-gray-100 dark:border-slate-700 pb-2">
+                            <div>
+                                <span class="text-xs font-bold text-gray-900 dark:text-white hover:text-red-600 cursor-pointer">Inovasi Energi Terbarukan</span>
+                                <p class="text-[10px] text-gray-400">89.1K Video • TikTok & Shorts</p>
+                            </div>
+                            <span class="text-xs font-bold text-emerald-500">▲ +18%</span>
+                        </li>
+                        <li class="flex items-start justify-between">
+                            <div>
+                                <span class="text-xs font-bold text-gray-900 dark:text-white hover:text-red-600 cursor-pointer">Ketahanan Pangan Lokal</span>
+                                <p class="text-[10px] text-gray-400">45.2K Diskusi • YouTube & Threads</p>
+                            </div>
+                            <span class="text-xs font-bold text-emerald-500">▲ +12%</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Section 5B: Resume Indeks Kesehatan Publik -->
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-gray-200 dark:border-slate-700 shadow-sm">
+                    <h2 class="text-xs font-extrabold text-gray-400 dark:text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                        <i class="ph-bold ph-heartbeat text-rose-500"></i> Indeks Kesehatan Publik
+                    </h2>
+                    <div class="space-y-3">
+                        <div class="bg-amber-50 dark:bg-amber-950/30 p-2.5 rounded-lg border border-amber-200 dark:border-amber-800/40">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-xs font-bold text-amber-900 dark:text-amber-300">Kualitas Udara (AQI Rata-rata)</span>
+                                <span class="text-xs font-black text-amber-700 dark:text-amber-400">85 (Sedang)</span>
+                            </div>
+                            <div class="w-full bg-amber-200 dark:bg-amber-900 h-1.5 rounded-full overflow-hidden">
+                                <div class="bg-amber-500 h-full w-[60%]"></div>
+                            </div>
+                        </div>
+
+                        <div class="bg-emerald-50 dark:bg-emerald-950/30 p-2.5 rounded-lg border border-emerald-200 dark:border-emerald-800/40">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-xs font-bold text-emerald-900 dark:text-emerald-300">Beban Varian Flu Musiman</span>
+                                <span class="text-xs font-black text-emerald-700 dark:text-emerald-400">Rendah</span>
+                            </div>
+                            <p class="text-[10px] text-emerald-700 dark:text-emerald-400">Tren penularan stabil dalam kurun 30 hari terakhir.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 5C: Portal Pasang Iklan Mandiri (Self-Serve Ad Portal) -->
+                <div class="bg-gradient-to-br from-slate-800 to-slate-900 text-white p-4 rounded-xl border border-slate-700 shadow-md">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-[10px] font-bold bg-yellow-500 text-slate-950 px-2 py-0.5 rounded uppercase">Self-Serve Ads</span>
+                        <i class="ph-bold ph-lightning text-yellow-400"></i>
+                    </div>
+                    <h3 class="text-sm font-bold mb-1">Pasang Banner Iklan Anda</h3>
+                    <p class="text-xs text-gray-300 mb-3">Tarik ribuan pengunjung harian secara langsung dengan penagihan otomatis.</p>
+                    <button onclick="openModal('adPortalModal')" class="w-full bg-white text-slate-900 hover:bg-gray-100 font-bold text-xs py-2 rounded-lg transition shadow flex items-center justify-center gap-1">
+                        <i class="ph-bold ph-calculator"></i> Hitung Biaya & Pasang
+                    </button>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="bg-white dark:bg-slate-800 border-t border-gray-200 dark:border-slate-700 py-6 mt-12">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="text-sm font-bold text-gray-800 dark:text-gray-200">
+                <span class="text-black dark:text-white">Navigasi</span><span class="text-red-600">News</span><span class="text-black dark:text-white">.link</span>
+            </p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Platform Agregator Berita Otomatis & Portal Jurnalisme Warga © 2026. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- MODAL 1: MODAL CITIZEN JOURNALISM (KIRIM BERITA) -->
+    <div id="citizenModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-xl max-w-lg w-full p-6 shadow-2xl border border-gray-200 dark:border-slate-700 relative">
+            <button onclick="closeModal('citizenModal')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-white">
+                <i class="ph-bold ph-x text-xl"></i>
+            </button>
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-1">
+                <i class="ph-bold ph-mega text-red-600"></i> Form Kirim Berita / Lapor Warga
+            </h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">Kirimkan kabar atau kejadian menarik dari daerah Anda untuk ditayangkan.</p>
+            
+            <form onsubmit="handleCitizenSubmit(event)" class="space-y-3">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Judul Laporan / Berita</label>
+                    <input type="text" required placeholder="Contoh: Kerja Bakti Pembersihan Sungai di Daerah Pasuruan" class="w-full text-xs px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Kategori</label>
+                        <select class="w-full text-xs px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                            <option>Daerah / Lokal</option>
+                            <option>Lingkungan Hidup</option>
+                            <option>Budaya</option>
+                            <option>Ekonomi-Keuangan</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Lokasi Daerah</label>
+                        <input type="text" required placeholder="Kab./Kota" class="w-full text-xs px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Rangkuman / Narasi Kejadian</label>
+                    <textarea rows="3" required placeholder="Tuliskan narasi singkat mengenai kejadian..." class="w-full text-xs px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500"></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Lampiran Foto/Bukti (Tautan/File)</label>
+                    <input type="file" class="w-full text-xs text-gray-500 dark:text-gray-400">
+                </div>
+                <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold text-xs py-2.5 rounded-lg shadow transition">
+                    Kirim Laporan Berita
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 2: MODAL PORTAL SEWA IKLAN MANDIRI (SELF-SERVE ADS) -->
+    <div id="adPortalModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-xl max-w-md w-full p-6 shadow-2xl border border-gray-200 dark:border-slate-700 relative">
+            <button onclick="closeModal('adPortalModal')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-white">
+                <i class="ph-bold ph-x text-xl"></i>
+            </button>
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-1">
+                <i class="ph-bold ph-calculator text-yellow-500"></i> Kalkulator & Fast Checkout Iklan
+            </h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">Pilih penempatan dan hitung estimasi biaya penayangan secara otomatis.</p>
+            
+            <form onsubmit="handleAdCheckout(event)" class="space-y-3">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Posisi Slot Banner</label>
+                    <select id="adPosition" onchange="calculateAdCost()" class="w-full text-xs px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                        <option value="50000">Sidebar Kiri (Rp 50.000 / Hari)</option>
+                        <option value="100000">Header Atas Banner (Rp 100.000 / Hari)</option>
+                        <option value="75000">In-Feed Berita (Rp 75.000 / Hari)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Durasi Penayangan (Hari)</label>
+                    <input type="number" id="adDays" value="3" min="1" max="30" onchange="calculateAdCost()" class="w-full text-xs px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                </div>
+                <div class="bg-gray-50 dark:bg-slate-700/50 p-3 rounded-lg border border-gray-200 dark:border-slate-600 flex justify-between items-center">
+                    <span class="text-xs font-bold text-gray-600 dark:text-gray-300">Total Biaya:</span>
+                    <span id="adTotalCost" class="text-base font-extrabold text-emerald-600 dark:text-emerald-400">Rp 150.000</span>
+                </div>
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2.5 rounded-lg shadow transition flex items-center justify-center gap-1.5">
+                    <i class="ph-bold ph-credit-card"></i> Bayar Otomatis (QRIS / Gateway)
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // Data Berita Simulasi (Digabungkan dengan penarikan Google News Feed)
+        const mockNews = [
+            {
+                id: 1,
+                title: "Kesepakatan Baru KTT Iklim 2026: Indonesia Perkuat Komitmen Reduksi Emisi Carbon",
+                category: "Lingkungan Hidup",
+                region: "Internasional",
+                time: "20 Menit lalu",
+                summary: "Delegasi internasional menyetujui pendanaan baru untuk perlindungan hutan tropis dan pengelolaan lahan gambut berkelanjutan dalam sesi penutupan KTT Iklim.",
+                url: "https://news.google.com",
+                image: "https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?w=600&auto=format&fit=crop&q=60"
+            },
+            {
+                id: 2,
+                title: "Proyeksi Ekonomi Digital Indonesia Tumbuh Melampaui Target Kuartal IV",
+                category: "Ekonomi-Keuangan",
+                region: "Nasional",
+                time: "1 Jam lalu",
+                summary: "Sektor transaksi digital dan fintech mencatatkan peningkatan volume signifikan yang didorong oleh adopsi sistem pembayaran otomatis di berbagai daerah.",
+                url: "https://news.google.com",
+                image: "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?w=600&auto=format&fit=crop&q=60"
+            },
+            {
+                id: 3,
+                title: "Penerapan Sistem Otomasi Pertanian Air Bersih di Jawa Barat Rampung",
+                category: "Ilmu Pengetahuan Teknologi",
+                region: "Daerah",
+                time: "2 Jam lalu",
+                summary: "Kelompok tani lokal memanfaatkan IoT dan sensor cuaca untuk mengoptimalkan penggunaan air sirkulasi pada budidaya tanaman pangan skala efisien.",
+                url: "https://news.google.com",
+                image: "https://images.unsplash.com/photo-1586771107445-d3ca888129ff?w=600&auto=format&fit=crop&q=60"
+            },
+            {
+                id: 4,
+                title: "Festival Seni dan Warisan Budaya Nusantara Resmi Dibuka Hari Ini",
+                category: "Budaya",
+                region: "Nasional",
+                time: "3 Jam lalu",
+                summary: "Ratusan seniman dari berbagai daerah menampilkan pertunjukan gabungan antara seni tradisional dan teknologi pencahayaan digital modern.",
+                url: "https://news.google.com",
+                image: "https://images.unsplash.com/photo-1460723237483-7a6dc9d0b212?w=600&auto=format&fit=crop&q=60"
+            },
+            {
+                id: 5,
+                title: "Rancangan Undang-Undang Tata Kelola Digital Resmi Memasuki Tahap Uji Publik",
+                category: "Politik",
+                region: "Nasional",
+                time: "4 Jam lalu",
+                summary: "Komisi terkait mengundang partisipasi publik dan akademisi untuk merumuskan regulasi perlindungan data pribadi dan kebebasan informasi.",
+                url: "https://news.google.com",
+                image: "https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?w=600&auto=format&fit=crop&q=60"
+            }
+        ];
+
+        let currentCategory = 'All';
+
+        // Filter Berita Berdasarkan Tombol Kategori / Wilayah
+        function filterCategory(categoryKey, titleLabel) {
+            currentCategory = categoryKey;
+            document.getElementById('activeFilterTitle').innerText = titleLabel || categoryKey;
+            
+            // Highlight Button Style
+            document.querySelectorAll('.sidebar-btn').forEach(btn => {
+                btn.classList.remove('bg-red-50', 'text-red-600', 'dark:bg-slate-700', 'dark:text-red-400');
+            });
+
+            renderNews();
+        }
+
+        // Render Berita Utama & Feed
+        function renderNews() {
+            const container = document.getElementById('newsFeedList');
+            const headlineContainer = document.getElementById('headlineContainer');
+            
+            let filtered = mockNews;
+            if (currentCategory !== 'All') {
+                filtered = mockNews.filter(item => 
+                    item.category.toLowerCase() === currentCategory.toLowerCase() || 
+                    item.region.toLowerCase() === currentCategory.toLowerCase()
+                );
+            }
+
+            document.getElementById('newsCountBadge').innerText = `${filtered.length} Berita`;
+
+            if (filtered.length === 0) {
+                headlineContainer.innerHTML = '';
+                container.innerHTML = `
+                    <div class="bg-white dark:bg-slate-800 p-8 rounded-xl text-center border border-gray-200 dark:border-slate-700">
+                        <i class="ph-bold ph-newspaper-clipping text-4xl text-gray-300 mb-2"></i>
+                        <p class="text-sm font-semibold text-gray-500">Belum ada berita untuk kategori ini.</p>
+                    </div>`;
+                return;
+            }
+
+            // Headline Card (Berita Pertama/Trending)
+            const topNews = filtered[0];
+            headlineContainer.innerHTML = `
+                <div class="relative h-64 sm:h-72 w-full overflow-hidden">
+                    <img src="${topNews.image}" alt="Headline" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent p-5 flex flex-col justify-end">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded">${topNews.region}</span>
+                            <span class="bg-slate-800/80 text-gray-200 text-[10px] font-medium px-2 py-0.5 rounded">${topNews.category}</span>
+                            <span class="text-gray-300 text-[10px]"><i class="ph-bold ph-clock"></i> ${topNews.time}</span>
+                        </div>
+                        <h3 class="text-lg sm:text-xl font-bold text-white mb-1 hover:text-red-400 transition cursor-pointer" onclick="window.open('${topNews.url}', '_blank')">
+                            ${topNews.title}
+                        </h3>
+                        <p class="text-xs text-gray-300 line-clamp-2 mb-3">${topNews.summary}</p>
+                        <div>
+                            <a href="${topNews.url}" target="_blank" class="inline-flex items-center gap-1 text-xs font-bold text-red-400 hover:text-red-300 transition">
+                                Buka Berita Asli <i class="ph-bold ph-arrow-square-out"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // List Feed Sisanya
+            const listItems = filtered.slice(1);
+            container.innerHTML = listItems.map(item => `
+                <article class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-gray-200 dark:border-slate-700 shadow-sm news-card-hover flex flex-col sm:flex-row gap-4">
+                    <img src="${item.image}" class="w-full sm:w-32 h-24 object-cover rounded-lg shrink-0">
+                    <div class="flex flex-col justify-between flex-grow">
+                        <div>
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-[10px] font-bold text-red-600 dark:text-red-400 uppercase tracking-wider">${item.region}</span>
+                                <span class="text-gray-300 dark:text-gray-600">•</span>
+                                <span class="text-[10px] font-medium text-gray-500 dark:text-gray-400">${item.category}</span>
+                                <span class="text-gray-300 dark:text-gray-600">•</span>
+                                <span class="text-[10px] text-gray-400">${item.time}</span>
+                            </div>
+                            <h4 class="text-sm font-bold text-gray-900 dark:text-white hover:text-red-600 dark:hover:text-red-400 transition cursor-pointer mb-1" onclick="window.open('${item.url}', '_blank')">
+                                ${item.title}
+                            </h4>
+                            <p class="text-xs text-gray-600 dark:text-gray-300 line-clamp-2 mb-2">${item.summary}</p>
+                        </div>
+                        <div class="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-slate-700/50">
+                            <a href="${item.url}" target="_blank" class="text-xs font-bold text-red-600 dark:text-red-400 hover:underline flex items-center gap-1">
+                                Buka Link Berita <i class="ph-bold ph-arrow-up-right"></i>
+                            </a>
+                            <button onclick="alert('Rangkuman AI: ${item.summary}')" class="text-[11px] text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 flex items-center gap-1">
+                                <i class="ph-bold ph-robot"></i> Ringkas AI
+                            </button>
+                        </div>
+                    </div>
+                </article>
+            `).join('');
+        }
+
+        // Live Fetch RSS via Proxy (Ala Google News Feed)
+        async function fetchLiveRSS() {
+            try {
+                const response = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https://news.google.com/rss?hl=id&gl=ID&ceid=ID:id');
+                const data = await response.json();
+                if(data.status === 'ok' && data.items.length > 0) {
+                    console.log("Google News Live Feed Loaded:", data.items);
+                }
+            } catch(e) {
+                console.log("Menggunakan Data Feed Lokal Simulasi.");
+            }
+        }
+
+        // Modal Utility Functions
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+        }
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        // Handle Netizen Form Submission
+        function handleCitizenSubmit(e) {
+            e.preventDefault();
+            alert('Terima kasih! Laporan berita warga Anda telah terkirim dan sedang diverifikasi oleh tim redaksi NavigasiNews.link.');
+            closeModal('citizenModal');
+        }
+
+        // Handle Self-Serve Ad Calculator & Checkout
+        function calculateAdCost() {
+            const price = parseInt(document.getElementById('adPosition').value);
+            const days = parseInt(document.getElementById('adDays').value) || 1;
+            const total = price * days;
+            document.getElementById('adTotalCost').innerText = `Rp ${total.toLocaleString('id-ID')}`;
+        }
+        function handleAdCheckout(e) {
+            e.preventDefault();
+            alert('Mengalihkan ke Payment Gateway (Midtrans/QRIS)... Pemasangan iklan otomatis akan aktif setelah konfirmasi pembayaran.');
+            closeModal('adPortalModal');
+        }
+
+        // Toggle Dark Mode
+        function toggleDarkMode() {
+            document.documentElement.classList.toggle('dark');
+            const icon = document.getElementById('themeIcon');
+            if(document.documentElement.classList.contains('dark')) {
+                icon.className = 'ph-bold ph-sun text-xl';
+            } else {
+                icon.className = 'ph-bold ph-moon text-xl';
+            }
+        }
+
+        // Init App
+        window.onload = () => {
+            renderNews();
+            fetchLiveRSS();
+            calculateAdCost();
+        };
+    </script>
+</body>
+</html>
